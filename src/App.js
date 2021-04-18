@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Alert from './Alert';
 import List from './List';
 
+const getLocalStorage = () => {
+ let list= localStorage.getItem('list')
+ if(list) {
+     return (list = JSON.parse(localStorage.getItem('list')))
+ }else{
+     return []
+ }
+};
+
+
 function App() {
-    const [name, setName] = useState("");
-    const [list, setList] = useState([]);
+    const [name, setName] = useState('');
+    const [list, setList] = useState(getLocalStorage());
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null);
     const [alert, setAlert] = useState({show: false, type: '', msg: ''});
@@ -17,21 +27,21 @@ function App() {
             //edit alert
             setList(list.map((item) => {
                 if(item.id === editId){
-                    return {...item, title: name}
+                    return {...item, title: name};
                 }
-                return item
+                return item;
             })
-            )
-            setName("")
-            setEditId(null)
-            setIsEdit(false)
-            showAlert(true, 'success', 'item value changed')
+            );
+            setName('');
+            setEditId(null);
+            setIsEdit(false);
+            showAlert(true, 'success', 'item value changed');
         }else{
             //success alert
-            showAlert(true, "success", "item added")
-            const newItems= {id: new Date().getTime.toString(), title: name};
+            showAlert(true, "success", "item added");
+            const newItems= {id: new Date().getTime().toString(), title: name};
             setList([...list, newItems]);
-            setName("");
+            setName('');
         }
     };
 
@@ -40,21 +50,24 @@ function App() {
     };
 
     const clearItems = () => {
-        showAlert(true, 'danger', 'cleared all items')
-        setList([])        
-    }
+        showAlert(true, 'danger', 'cleared all items');
+        setList([]);        
+    };
 
     const deleteItems = (id) => {
-        showAlert(true, 'danger', 'removed items')
-        setList(list.filter((item) => item.id !== id))
-    }
+        showAlert(true, 'danger', 'removed items');
+        setList(list.filter((item) => item.id !== id));
+    };
 
     const editItems = (id) => {
-        const newEditItem = list.find((item) => item.id === id)
+        const newEditItem = list.find((item) => item.id === id);
+        setIsEdit(true);
         setEditId(id);
         setName(newEditItem.title);
-        setIsEdit(true);
-        }
+        };
+    useEffect(() => {
+        localStorage.setItem('list', JSON.stringify(list));
+    },[list]);
 
     return(
         <section className= "section-center">
@@ -69,14 +82,16 @@ function App() {
                         value={name}
                         onChange={event => setName(event.target.value)}
                     />
-                    <button className= "submit-btn">{isEdit ? 'Edit' : 'Submit'}</button>
+                    <button type= 'submit' className= "submit-btn">{isEdit ? 'Edit' : 'Submit'}</button>
                 </div>   
             </form>
+            {list.length > 0 && (
             <div className= "grocery-container">
-                <List list = {list} deleteItem= {deleteItems} editItems= {editItems} title= {name}/>
+                <List items = {list} deleteItem= {deleteItems} editItems= {editItems} />
                 <button className= "clear-btn" onClick={clearItems}>clear all items</button>
             </div>
+            )}
         </section>        
-    )
+    );
 }
 export default App;
