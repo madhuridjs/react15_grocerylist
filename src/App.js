@@ -5,7 +5,8 @@ import List from './List';
 function App() {
     const [name, setName] = useState("");
     const [list, setList] = useState([]);
-    const [isEdit, setIsEdit] = useState("");
+    const [isEdit, setIsEdit] = useState(false);
+    const [editId, setEditId] = useState(null);
     const [alert, setAlert] = useState({show: false, type: '', msg: ''});
 
     const handleSubmit= (event) => {
@@ -14,6 +15,17 @@ function App() {
             showAlert(true,'danger','add grocery item');
         }else if (name && isEdit) {
             //edit alert
+            setList(list.map((item) => {
+                if(item.id === editId){
+                    return {...item, title: name}
+                }
+                return item
+            })
+            )
+            setName("")
+            setEditId(null)
+            setIsEdit(false)
+            showAlert(true, 'success', 'item value changed')
         }else{
             //success alert
             showAlert(true, "success", "item added")
@@ -34,8 +46,15 @@ function App() {
 
     const deleteItems = (id) => {
         showAlert(true, 'danger', 'removed items')
-       setList(list.filter((item) => item.id !== id))
+        setList(list.filter((item) => item.id !== id))
     }
+
+    const editItems = (id) => {
+        const newEditItem = list.find((item) => item.id === id)
+        setEditId(id);
+        setName(newEditItem.title);
+        setIsEdit(true);
+        }
 
     return(
         <section className= "section-center">
@@ -50,11 +69,11 @@ function App() {
                         value={name}
                         onChange={event => setName(event.target.value)}
                     />
-                    <button className= "submit-btn">Submit</button>
+                    <button className= "submit-btn">{isEdit ? 'Edit' : 'Submit'}</button>
                 </div>   
             </form>
             <div className= "grocery-container">
-                <List list = {list} deleteItem= {deleteItems}/>
+                <List list = {list} deleteItem= {deleteItems} editItems= {editItems} title= {name}/>
                 <button className= "clear-btn" onClick={clearItems}>clear all items</button>
             </div>
         </section>        
